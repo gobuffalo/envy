@@ -57,7 +57,7 @@ func MustSet(key string, value string) error {
 	if err != nil {
 		return err
 	}
-	Set(key, value)
+	env[key] = value
 	return nil
 }
 
