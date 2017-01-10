@@ -35,6 +35,17 @@ func Test_Set(t *testing.T) {
 	r.Equal("foo", envy.Get("FOO", "bar"))
 }
 
+func Test_MustSet(t *testing.T) {
+	r := require.New(t)
+
+	r.Zero(os.Getenv("FOO"))
+
+	err := envy.MustSet("FOO", "BAR")
+	r.NoError(err)
+
+	r.Equal("BAR", os.Getenv("FOO"))
+}
+
 func Test_Temp(t *testing.T) {
 	r := require.New(t)
 
