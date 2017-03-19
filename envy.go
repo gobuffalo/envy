@@ -3,6 +3,7 @@ package envy
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 )
@@ -80,4 +81,22 @@ func Temp(f func()) {
 	}
 	defer func() { env = oenv }()
 	f()
+}
+
+// GoPath returns the first GOPATH that is set
+func GoPath() string {
+	paths := GoPaths()
+	if len(paths) > 0 {
+		return paths[0]
+	}
+	return ""
+}
+
+// GoPaths returns all possible GOPATHS that are set.
+func GoPaths() []string {
+	gp := Get("GOPATH", "")
+	if runtime.GOOS == "windows" {
+		return strings.Split(gp, ";") // Windows uses a different separator
+	}
+	return strings.Split(gp, ":")
 }
