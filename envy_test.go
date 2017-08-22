@@ -130,6 +130,16 @@ func Test_ErrorWhenSingleFileLoadDoesNotExist(t *testing.T) {
 	})
 }
 
+func Test_KeepEnvWhenFileInListFails(t *testing.T) {
+	r := require.New(t)
+	envy.Temp(func() {
+		err := envy.Load(".env", ".env.FAKE")
+		r.Error(err)
+		r.Equal("none", envy.Get("FLAVOUR", "FAILED"))
+		r.Equal("root", envy.Get("DIR", "FAILED"))
+	})
+}
+
 func Test_KeepEnvWhenSecondLoadFails(t *testing.T) {
 	r := require.New(t)
 	envy.Temp(func() {
@@ -140,6 +150,16 @@ func Test_KeepEnvWhenSecondLoadFails(t *testing.T) {
 
 		err = envy.Load(".env.FAKE")
 
+		r.Equal("none", envy.Get("FLAVOUR", "FAILED"))
+		r.Equal("root", envy.Get("DIR", "FAILED"))
+	})
+}
+
+func Test_StopLoadingWhenFileInListFails(t *testing.T) {
+	r := require.New(t)
+	envy.Temp(func() {
+		err := envy.Load(".env", ".env.FAKE", "test_env/.env.prod")
+		r.Error(err)
 		r.Equal("none", envy.Get("FLAVOUR", "FAILED"))
 		r.Equal("root", envy.Get("DIR", "FAILED"))
 	})

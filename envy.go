@@ -51,11 +51,36 @@ func Reload() {
 // IE: envy.Load(".env", "test_env/.env") will result in DIR=test_env
 // If no arg passed, it will try to load a .env file.
 func Load(files ...string) error {
-	if err := godotenv.Overload(files...); err != nil {
+
+	// If no files received, load the default one
+	if len(files) == 0 {
+		err := godotenv.Overload()
+		Reload()
 		return err
 	}
 
-	Reload()
+	// We received a list of files
+	for _, file := range files {
+
+		// Check if it exists or we can access
+		_, err := os.Stat(file)
+
+		if err != nil {
+			// It does not exist or we can not access.
+			// Return and stop loading
+			return err
+		}
+
+		// It exists and we have permission. Load it
+		err = godotenv.Overload(file)
+		Reload()
+
+		// If it has an error, return it
+		if err != nil {
+			return err
+		}
+
+	}
 	return nil
 }
 
