@@ -73,12 +73,14 @@ func Load(files ...string) error {
 
 		// It exists and we have permission. Load it
 		err = godotenv.Overload(file)
-		Reload()
 
 		// If it has an error, return it
 		if err != nil {
 			return err
 		}
+
+		// Reload the env so all new changes are noticed
+		Reload()
 
 	}
 	return nil
