@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/joho/godotenv"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -15,6 +16,11 @@ var gil = &sync.Mutex{}
 var env = map[string]string{}
 
 func init() {
+	loadEnv()
+}
+
+// Load the ENV variables to the env map
+func loadEnv() {
 	v := runtime.Version()
 	// set the GOPATH if using >= 1.8 and the GOPATH isn't set
 	if v >= "go1.8" && os.Getenv("GOPATH") == "" {
@@ -31,6 +37,50 @@ func init() {
 		pair := strings.Split(e, "=")
 		env[pair[0]] = os.Getenv(pair[0])
 	}
+}
+
+// Reload the ENV variables. Useful if
+// an external ENV manager has been used
+func Reload() {
+	env = map[string]string{}
+	loadEnv()
+}
+
+// Load .env files. Files will be loaded in the same order that are received.
+// Redefined vars will override previously existing values.
+// IE: envy.Load(".env", "test_env/.env") will result in DIR=test_env
+// If no arg passed, it will try to load a .env file.
+func Load(files ...string) error {
+
+	// If no files received, load the default one
+	if len(files) == 0 {
+		err := godotenv.Overload()
+		if err == nil {
+			Reload()
+		}
+		return err
+	}
+
+	// We received a list of files
+	for _, file := range files {
+
+		// Check if it exists or we can access
+		if _, err := os.Stat(file); err != nil {
+			// It does not exist or we can not access.
+			// Return and stop loading
+			return err
+		}
+
+		// It exists and we have permission. Load it
+		if err := godotenv.Overload(file); err != nil {
+			return err
+		}
+
+		// Reload the env so all new changes are noticed
+		Reload()
+
+	}
+	return nil
 }
 
 // Get a value from the ENV. If it doesn't exist the
