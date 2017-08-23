@@ -55,7 +55,9 @@ func Load(files ...string) error {
 	// If no files received, load the default one
 	if len(files) == 0 {
 		err := godotenv.Overload()
-		Reload()
+		if err == nil {
+			Reload()
+		}
 		return err
 	}
 
