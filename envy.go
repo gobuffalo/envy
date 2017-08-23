@@ -63,19 +63,14 @@ func Load(files ...string) error {
 	for _, file := range files {
 
 		// Check if it exists or we can access
-		_, err := os.Stat(file)
-
-		if err != nil {
+		if _, err := os.Stat(file); err != nil {
 			// It does not exist or we can not access.
 			// Return and stop loading
 			return err
 		}
 
 		// It exists and we have permission. Load it
-		err = godotenv.Overload(file)
-
-		// If it has an error, return it
-		if err != nil {
+		if err := godotenv.Overload(file); err != nil {
 			return err
 		}
 
