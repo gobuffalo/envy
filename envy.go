@@ -148,9 +148,15 @@ func Temp(f func()) {
 	f()
 }
 
-// GoPath returns the first GOPATH that is set
 func GoPath() string {
+	root, _ := os.Getwd()
 	paths := GoPaths()
+
+	for i := 0; i < len(paths); i++ {
+		if strings.HasPrefix(root, filepath.Join(paths[i], "src")) {
+			return paths[i]
+		}
+	}
 	if len(paths) > 0 {
 		return paths[0]
 	}
