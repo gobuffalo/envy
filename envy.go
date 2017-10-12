@@ -180,3 +180,13 @@ func CurrentPackage() string {
 	pwd = strings.TrimPrefix(pwd, string(os.PathSeparator))
 	return filepath.ToSlash(pwd)
 }
+
+func Environ() []string {
+	gil.Lock()
+	defer gil.Unlock()
+	e := []string{}
+	for k, v := range env {
+		e = append(e, fmt.Sprintf("%s=%s", k, v))
+	}
+	return e
+}
