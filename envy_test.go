@@ -2,6 +2,7 @@ package envy_test
 
 import (
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/gobuffalo/envy"
@@ -74,7 +75,11 @@ func Test_GoPath(t *testing.T) {
 func Test_GoPaths(t *testing.T) {
 	r := require.New(t)
 	envy.Temp(func() {
-		envy.Set("GOPATH", "/foo:/bar")
+		if runtime.GOOS == "windows" {
+			envy.Set("GOPATH", "/foo;/bar")
+		} else {
+			envy.Set("GOPATH", "/foo:/bar")
+		}
 		r.Equal([]string{"/foo", "/bar"}, envy.GoPaths())
 	})
 }
