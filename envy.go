@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -92,6 +93,20 @@ func Get(key string, value string) string {
 		return v
 	}
 	return value
+}
+
+// GetInt gets a value from the ENV. If it doesn't exist the default
+// value will be returned
+func GetInt(key string, value int) int {
+	iStr, err := MustGet(key)
+	if err != nil {
+		return value
+	}
+	i, err := strconv.Atoi(iStr)
+	if err != nil {
+		return value
+	}
+	return i
 }
 
 // Get a value from the ENV. If it doesn't exist
