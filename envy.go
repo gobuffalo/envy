@@ -102,7 +102,7 @@ func MustGet(key string) (string, error) {
 	if v, ok := env[key]; ok {
 		return v, nil
 	}
-	return "", fmt.Errorf("could not file ENV var with %s", key)
+	return "", fmt.Errorf("could not find ENV var with %s", key)
 }
 
 // Set a value into the ENV. This is NOT permanent. It will
