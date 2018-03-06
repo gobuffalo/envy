@@ -11,7 +11,6 @@ import (
 
 	"github.com/joho/godotenv"
 	homedir "github.com/mitchellh/go-homedir"
-	envy "v/github.com/gobuffalo/envy@v1.4.0"
 )
 
 var gil = &sync.Mutex{}
@@ -28,7 +27,7 @@ func loadEnv() {
 
 	if os.Getenv("GO_ENV") == "" {
 		if flag.Lookup("test.v") != nil {
-			envy.Set("GO_ENV", "test")
+			Set("GO_ENV", "test")
 		}
 	}
 
