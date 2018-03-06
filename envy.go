@@ -1,6 +1,7 @@
 package envy
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,19 +11,27 @@ import (
 
 	"github.com/joho/godotenv"
 	homedir "github.com/mitchellh/go-homedir"
+	envy "v/github.com/gobuffalo/envy@v1.4.0"
 )
 
 var gil = &sync.Mutex{}
 var env = map[string]string{}
 
 func init() {
-	loadEnv()
 	Load()
+	loadEnv()
 }
 
 // Load the ENV variables to the env map
 func loadEnv() {
 	v := runtime.Version()
+
+	if os.Getenv("GO_ENV") == "" {
+		if flag.Lookup("test.v") != nil {
+			envy.Set("GO_ENV", "test")
+		}
+	}
+
 	// set the GOPATH if using >= 1.8 and the GOPATH isn't set
 	if v >= "go1.8" && os.Getenv("GOPATH") == "" {
 		home, err := homedir.Dir()
