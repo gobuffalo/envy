@@ -4,13 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/joho/godotenv"
-	homedir "github.com/mitchellh/go-homedir"
 )
 
 var gil = &sync.Mutex{}
@@ -23,7 +24,22 @@ func init() {
 
 // Load the ENV variables to the env map
 func loadEnv() {
-	v := runtime.Version()
+	// Detect the Go version on the user system, not the one that was used to compile the binary
+	v := ""
+	out, err := exec.Command("go", "version").Output()
+	if err == nil {
+		// This will break when Go 2 lands
+		v = strings.Split(string(out), " ")[2][4:]
+	} else {
+		v = runtime.Version()[4:]
+	}
+
+	goRuntimeVersion, _ := strconv.ParseFloat(runtime.Version()[4:], 64)
+
+	goVersion, err := strconv.ParseFloat(v, 64)
+	if err != nil {
+		goVersion = goRuntimeVersion
+	}
 
 	if os.Getenv("GO_ENV") == "" {
 		if flag.Lookup("test.v") != nil {
@@ -32,13 +48,11 @@ func loadEnv() {
 	}
 
 	// set the GOPATH if using >= 1.8 and the GOPATH isn't set
-	if v >= "go1.8" && os.Getenv("GOPATH") == "" {
-		home, err := homedir.Dir()
+	if goVersion >= 8 && os.Getenv("GOPATH") == "" {
+		out, err := exec.Command("go", "env", "GOPATH").Output()
 		if err == nil {
-			home, err := homedir.Expand(home)
-			if err == nil {
-				os.Setenv("GOPATH", filepath.Join(home, "go"))
-			}
+			gp := strings.TrimSpace(string(out))
+			os.Setenv("GOPATH", gp)
 		}
 	}
 
@@ -183,17 +197,21 @@ func GoPaths() []string {
 
 func CurrentPackage() string {
 	pwd, _ := os.Getwd()
+	pwd = strings.Trim(filepath.ToSlash(pwd), "/")
 	for _, gp := range GoPaths() {
-		pwd = strings.TrimPrefix(pwd, filepath.Join(gp, "src"))
+		gp := strings.Trim(filepath.ToSlash(gp), "/") + "/src/"
+		if strings.HasPrefix(pwd, gp) {
+			pwd = pwd[len(gp):]
+			break
+		}
 	}
-	pwd = strings.TrimPrefix(pwd, string(os.PathSeparator))
-	return filepath.ToSlash(pwd)
+	return pwd
 }
 
 func Environ() []string {
 	gil.Lock()
 	defer gil.Unlock()
-	e := []string{}
+	var e []string
 	for k, v := range env {
 		e = append(e, fmt.Sprintf("%s=%s", k, v))
 	}
