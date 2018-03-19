@@ -172,18 +172,7 @@ func Temp(f func()) {
 }
 
 func GoPath() string {
-	root, _ := os.Getwd()
-	paths := GoPaths()
-
-	for i := 0; i < len(paths); i++ {
-		if strings.HasPrefix(root, filepath.Join(paths[i], "src")) {
-			return paths[i]
-		}
-	}
-	if len(paths) > 0 {
-		return paths[0]
-	}
-	return ""
+	return Get("GOPATH", "")
 }
 
 // GoPaths returns all possible GOPATHS that are set.
@@ -197,15 +186,9 @@ func GoPaths() []string {
 
 func CurrentPackage() string {
 	pwd, _ := os.Getwd()
-	pwd = strings.Trim(filepath.ToSlash(pwd), "/")
-	for _, gp := range GoPaths() {
-		gp := strings.Trim(filepath.ToSlash(gp), "/") + "/src/"
-		if strings.HasPrefix(pwd, gp) {
-			pwd = pwd[len(gp):]
-			break
-		}
-	}
-	return pwd
+	pwd = strings.TrimPrefix(pwd, filepath.Join(GoPath(), "src"))
+	pwd = strings.TrimPrefix(pwd, string(filepath.Separator))
+	return filepath.ToSlash(pwd)
 }
 
 func Environ() []string {
