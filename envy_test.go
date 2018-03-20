@@ -46,6 +46,20 @@ func Test_MustSet(t *testing.T) {
 	r.Equal("BAR", os.Getenv("FOO"))
 }
 
+func Test_GetInt(t *testing.T) {
+	const envName = "ENVY_TEST_INT"
+	r := require.New(t)
+
+	r.Zero(os.Getenv(envName))
+
+	r.Equal(1234, envy.GetInt(envName, 1234))
+
+	envy.Temp(func() {
+		envy.Set(envName, "2345")
+		r.Equal(2345, envy.GetInt(envName, 1234))
+	})
+}
+
 func Test_Temp(t *testing.T) {
 	r := require.New(t)
 
