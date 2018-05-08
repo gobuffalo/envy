@@ -167,7 +167,8 @@ func Map() map[string]string {
 // those values temporarily during the run of the function.
 // At the end of the function run the copy is discarded and
 // the original values are replaced. This is useful for testing.
-// Warning: This function is NOT safe to use from a goroutine.
+// Warning: This function is NOT safe to use from a goroutine or
+// from code which may access any Get or Set function from a goroutine
 func Temp(f func()) {
 	oenv := env
 	env = map[string]string{}
