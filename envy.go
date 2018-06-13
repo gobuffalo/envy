@@ -44,7 +44,7 @@ func loadEnv() {
 	}
 
 	if os.Getenv("GO_ENV") == "" {
-		if flag.Lookup("test.v") != nil {
+		if v := flag.Lookup("test.v"); v != nil && v.Value.String() == "true" {
 			env["GO_ENV"] = "test"
 		}
 	}
