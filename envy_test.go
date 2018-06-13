@@ -135,7 +135,7 @@ func Test_OverloadParams(t *testing.T) {
 func Test_ErrorWhenSingleFileLoadDoesNotExist(t *testing.T) {
 	r := require.New(t)
 	Temp(func() {
-		delete(Map(), "FLAVOUR")
+		delete(env, "FLAVOUR")
 		err := Load(".env.fake")
 
 		r.Error(err)
