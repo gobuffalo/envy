@@ -1,3 +1,13 @@
+/*
+package envy makes working with ENV variables in Go trivial.
+
+* Get ENV variables with default values.
+* Set ENV variables safely without affecting the underlying system.
+* Temporarily change ENV vars; useful for testing.
+* Map all of the key/values in the ENV.
+* Loads .env files (by using [godotenv](https://github.com/joho/godotenv/))
+* More!
+*/
 package envy
 
 import (
