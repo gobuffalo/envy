@@ -54,7 +54,12 @@ func loadEnv() {
 	}
 
 	if os.Getenv("GO_ENV") == "" {
-		if v := flag.Lookup("test.v"); v != nil && v.Value.String() == "true" {
+		// if the flag "test.v" is *defined*, we're running as a unit test. Note that we don't care
+		// about v.Value (verbose test mode); we just want to know if the test environment has defined
+		// it. It's also possible that the flags are not yet fully parsed (i.e. flag.Parsed() == false),
+		// so we could not depend on v.Value anyway.
+		//
+		if v := flag.Lookup("test.v"); v != nil {
 			env["GO_ENV"] = "test"
 		}
 	}
