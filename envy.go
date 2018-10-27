@@ -205,6 +205,10 @@ func GoPath() string {
 	return Get("GOPATH", "")
 }
 
+func GoBin() string {
+	return Get("GO_BIN", "go")
+}
+
 // GoPaths returns all possible GOPATHS that are set.
 func GoPaths() []string {
 	gp := Get("GOPATH", "")
