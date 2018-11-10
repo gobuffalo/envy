@@ -17,7 +17,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -39,22 +38,6 @@ func init() {
 func loadEnv() {
 	gil.Lock()
 	defer gil.Unlock()
-	// Detect the Go version on the user system, not the one that was used to compile the binary
-	v := ""
-	out, err := exec.Command("go", "version").Output()
-	if err == nil {
-		// This will break when Go 2 lands
-		v = strings.Split(string(out), " ")[2][4:]
-	} else {
-		v = runtime.Version()[4:]
-	}
-
-	goRuntimeVersion, _ := strconv.ParseFloat(runtime.Version()[4:], 64)
-
-	goVersion, err := strconv.ParseFloat(v, 64)
-	if err != nil {
-		goVersion = goRuntimeVersion
-	}
 
 	if os.Getenv("GO_ENV") == "" {
 		// if the flag "test.v" is *defined*, we're running as a unit test. Note that we don't care
@@ -68,7 +51,7 @@ func loadEnv() {
 	}
 
 	// set the GOPATH if using >= 1.8 and the GOPATH isn't set
-	if goVersion >= 8 && os.Getenv("GOPATH") == "" {
+	if os.Getenv("GOPATH") == "" {
 		out, err := exec.Command("go", "env", "GOPATH").Output()
 		if err == nil {
 			gp := strings.TrimSpace(string(out))
