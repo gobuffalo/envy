@@ -14,11 +14,11 @@ steps:
     displayName: "Setup Go Workspace"
   - script: |
       cat > .env <<- EOM
-# This is a comment
-# We can use equal or colon notation
-DIR: root
-FLAVOUR: none
-INSIDE_FOLDER=false
+      # This is a comment
+      # We can use equal or colon notation
+      DIR: root
+      FLAVOUR: none
+      INSIDE_FOLDER=false
       EOM
       EndOfMessage
       go get -t -v ./...
