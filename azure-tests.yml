@@ -13,7 +13,14 @@ steps:
         mv !(gopath) "$(modulePath)"
     displayName: "Setup Go Workspace"
   - script: |
-      ls -la
+      cat > .env <<- EOM
+# This is a comment
+# We can use equal or colon notation
+DIR: root
+FLAVOUR: none
+INSIDE_FOLDER=false
+      EOM
+      EndOfMessage
       go get -t -v ./...
       go test -race ./...
     workingDirectory: "$(modulePath)"
