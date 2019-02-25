@@ -1,12 +1,28 @@
 package envy
 
 import (
+	"io/ioutil"
+	"log"
 	"os"
 	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+var _ = func() error {
+	b, err := ioutil.ReadFile("env")
+	if err != nil {
+		log.Fatal(err)
+	}
+	f, err := os.Create(".env")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	f.Write(b)
+	return nil
+}()
 
 func Test_Mods(t *testing.T) {
 	r := require.New(t)

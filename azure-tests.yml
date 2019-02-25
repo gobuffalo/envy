@@ -13,7 +13,6 @@ steps:
         mv !(gopath) "$(modulePath)"
     displayName: "Setup Go Workspace"
   - script: |
-      azure.sh
       go get -t -v ./...
       go test -race ./...
     workingDirectory: "$(modulePath)"
