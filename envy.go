@@ -168,7 +168,7 @@ func Map() map[string]string {
 	for k, v := range env {
 		cp[k] = v
 	}
-	return env
+	return cp
 }
 
 // Temp makes a copy of the values and allows operation on
