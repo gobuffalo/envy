@@ -1,6 +1,7 @@
 package envy
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -26,11 +27,12 @@ var _ = func() error {
 
 func Test_Mods(t *testing.T) {
 	r := require.New(t)
-	Temp(func() {
-		Set(GO111MODULE, "off")
-		r.False(Mods())
-		Set(GO111MODULE, "on")
-		r.True(Mods())
+	e := New()
+	e.Temp(func() {
+		e.Set(GO111MODULE, "off")
+		r.False(e.Mods())
+		e.Set(GO111MODULE, "on")
+		r.True(e.Mods())
 	})
 }
 
@@ -87,6 +89,7 @@ func Test_Temp(t *testing.T) {
 
 	Temp(func() {
 		Set("BAR", "foo")
+		fmt.Println("### Default.env ->", Default.env)
 		r.Equal("foo", Get("BAR", "bar"))
 		_, err = MustGet("BAR")
 		r.NoError(err)
@@ -168,7 +171,7 @@ func Test_OverloadParams(t *testing.T) {
 func Test_ErrorWhenSingleFileLoadDoesNotExist(t *testing.T) {
 	r := require.New(t)
 	Temp(func() {
-		delete(env, "FLAVOUR")
+		Default.env.Delete("FLAVOUR")
 		err := Load(".env.fake")
 
 		r.Error(err)
@@ -216,7 +219,7 @@ func Test_GOPATH_Not_Set(t *testing.T) {
 
 	Temp(func() {
 		MustSet("GOPATH", "/go")
-		loadEnv()
+		Default.loadEnv()
 		r.Equal("/go", Get("GOPATH", "notset"))
 	})
 
