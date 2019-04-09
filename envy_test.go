@@ -122,12 +122,12 @@ func Test_CurrentPackage(t *testing.T) {
 }
 
 // Env files loading
-func Test_LoadEnvLoadsEnvFile(t *testing.T) {
+func Test_LoadEnvNoImplicitLoad(t *testing.T) {
 	r := require.New(t)
 	Temp(func() {
-		r.Equal("root", Get("DIR", ""))
-		r.Equal("none", Get("FLAVOUR", ""))
-		r.Equal("false", Get("INSIDE_FOLDER", ""))
+		r.Equal("", Get("DIR", ""))
+		r.Equal("", Get("FLAVOUR", ""))
+		r.Equal("", Get("INSIDE_FOLDER", ""))
 	})
 }
 

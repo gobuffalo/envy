@@ -33,7 +33,6 @@ var env = map[string]string{}
 const GO111MODULE = "GO111MODULE"
 
 func init() {
-	Load()
 	loadEnv()
 }
 
