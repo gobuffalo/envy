@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 
@@ -225,4 +226,70 @@ func Test_GOPATH_Not_Set(t *testing.T) {
 	})
 
 	r.Equal("github.com/gobuffalo/envy", CurrentPackage())
+}
+
+func Test_CurrentModule(t *testing.T) {
+	r := require.New(t)
+
+	Temp(func() {
+		MustSet("GO111MODULE", "on")
+		loadEnv()
+
+		// Make a new dir for test
+		testDirPath := "submodule"
+		err := os.Mkdir(testDirPath, os.ModeDir|os.ModePerm)
+		r.Nil(err)
+
+		// Make sure the dir will delete after test
+		// And change back to the old directory
+		pwd, err := os.Getwd()
+		r.Nil(err)
+		defer func() {
+			os.RemoveAll(filepath.Join(pwd, testDirPath))
+			os.Chdir(pwd)
+		}()
+
+		// Change dir to a subdirectory
+		err = os.Chdir(testDirPath)
+		r.Nil(err)
+
+		if gomod, err := CurrentModule(); err == nil {
+			r.Equal("github.com/gobuffalo/envy", gomod)
+		} else {
+			r.Contains([]string{
+				"run `go env GOMOD` command return error while go module is enabled",
+				"run `go env GOMOD` command return empty while go module is enabled",
+			}, err.Error())
+		}
+	})
+}
+
+func Test_CurrentModule_NoGoModFile(t *testing.T) {
+	r := require.New(t)
+
+	Temp(func() {
+		MustSet("GO111MODULE", "on")
+		loadEnv()
+
+		// Make sure the dir will delete after test
+		// And change back to the old directory
+		pwd, err := os.Getwd()
+		r.Nil(err)
+		defer func() {
+			os.Chdir(pwd)
+		}()
+
+		// Change dir to a location where no go.mod defined
+		err = os.Chdir(os.TempDir())
+		r.Nil(err)
+
+		_, err = CurrentModule()
+		r.NotNil(err)
+		// go version less than 1.11 not support the command; go above 1.11 will report the go.mod is malformed (output the /dev/null)
+		r.Contains([]string{
+			"run `go env GOMOD` command return error while go module is enabled",
+			"run `go env GOMOD` command return empty while go module is enabled",
+			"go.mod is malformed",
+		}, err.Error())
+	})
 }
