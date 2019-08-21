@@ -245,7 +245,22 @@ func CurrentModule() (string, error) {
 	if !Mods() {
 		return CurrentPackage(), nil
 	}
-	moddata, err := ioutil.ReadFile("go.mod")
+
+	goModFile := "go.mod"
+	if _, err := os.Stat(goModFile); err != nil {
+		// try to figure out the go.mod location by run go command `go env GOMOD`
+		out, err := exec.Command(GoBin(), "env", "GOMOD").Output()
+		if err != nil {
+			return "", errors.New("run `go env GOMOD` command return error while go module is enabled")
+		}
+
+		goModFile = strings.TrimSpace(string(out))
+		if goModFile == "" {
+			return "", errors.New("run `go env GOMOD` command return empty while go module is enabled")
+		}
+	}
+
+	moddata, err := ioutil.ReadFile(goModFile)
 	if err != nil {
 		return "", errors.New("go.mod cannot be read or does not exist while go module is enabled")
 	}
