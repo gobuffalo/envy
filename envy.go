@@ -33,7 +33,10 @@ var env = map[string]string{}
 const GO111MODULE = "GO111MODULE"
 
 func init() {
-	Load()
+	err := Load()
+	if err != nil {
+		fmt.Printf("unable to load env file(s): %s", err.Error())
+	}
 	loadEnv()
 }
 
