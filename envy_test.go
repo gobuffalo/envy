@@ -31,6 +31,10 @@ func Test_Mods(t *testing.T) {
 		r.False(Mods())
 		Set(GO111MODULE, "on")
 		r.True(Mods())
+		Set(GO111MODULE, "auto")
+		r.Equal(!InGoPath(), Mods())
+		Set(GO111MODULE, "")
+		r.Equal(!InGoPath(), Mods())
 	})
 }
 
