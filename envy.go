@@ -35,7 +35,7 @@ const GO111MODULE = "GO111MODULE"
 func init() {
 	err := Load()
 	if err != nil {
-		fmt.Printf("unable to load env file(s): %s", err.Error())
+		fmt.Printf("[ENVY] unable to load env file(s) on init: %s\n", err.Error())
 	}
 	loadEnv()
 }
