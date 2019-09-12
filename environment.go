@@ -77,7 +77,7 @@ func New() (*Environment, error) {
 }
 
 func (e *Environment) loadGoMod() error {
-	out, err := exec.Command("go", "env", "MODROOT").Output()
+	out, err := exec.Command("go", "env", "GOMOD").Output()
 	if err == nil {
 		gp := strings.TrimSpace(string(out))
 		e.goMod = gp
