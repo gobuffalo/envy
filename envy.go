@@ -11,7 +11,6 @@ package envy makes working with ENV variables in Go trivial.
 package envy
 
 import (
-	"fmt"
 	"os"
 	"strings"
 )
@@ -19,7 +18,7 @@ import (
 var env = func() *Environment {
 	e := &Environment{}
 	if err := e.Load(); err != nil {
-		fmt.Println(">>>TODO envy.go:101: err ", err)
+		// don't panic, it's ok
 	}
 	return e
 }()
