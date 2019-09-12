@@ -24,11 +24,10 @@ import (
 
 type Environment struct {
 	*packages.Package
-	pairs    *envMap
-	goPath   string
-	goMod    string
-	goBin    string
-	loadOnce sync.Once
+	pairs  *envMap
+	goPath string
+	goMod  string
+	goBin  string
 }
 
 func (e *Environment) clone() *Environment {
@@ -48,37 +47,33 @@ func (e *Environment) clone() *Environment {
 	return en
 }
 
-func (e *Environment) Init() error {
-	var err error
-	(&e.loadOnce).Do(func() {
-		cfg := &packages.Config{}
-		pkgs, err := packages.Load(cfg)
-		if err != nil {
-			err = err
-			return
-		}
+func New() (*Environment, error) {
+	cfg := &packages.Config{}
+	pkgs, err := packages.Load(cfg)
+	if err != nil {
+		return nil, err
+	}
 
-		if len(pkgs) == 0 {
-			err = fmt.Errorf("could not find any packages")
-			return
-		}
+	if len(pkgs) == 0 {
+		return nil, fmt.Errorf("could not find any packages")
+	}
 
-		e.Package = pkgs[0]
+	e := &Environment{}
+	e.Package = pkgs[0]
 
-		e.goBin = os.Getenv("GO_BIN")
-		if len(e.goBin) == 0 {
-			e.goBin = "go"
-		}
+	e.goBin = os.Getenv("GO_BIN")
+	if len(e.goBin) == 0 {
+		e.goBin = "go"
+	}
 
-		if err = e.loadEnv(); err != nil {
-			return
-		}
+	if err = e.loadEnv(); err != nil {
+		return nil, err
+	}
 
-		if err = e.loadGoMod(); err != nil {
-			return
-		}
-	})
-	return err
+	if err = e.loadGoMod(); err != nil {
+		return nil, err
+	}
+	return e, err
 }
 
 func (e *Environment) loadGoMod() error {
@@ -117,8 +112,12 @@ func (e *Environment) Mods() bool {
 // Reload the ENV variables. Useful if
 // an external ENV manager has been used
 func (e *Environment) Reload() error {
-	e.loadOnce = sync.Once{}
-	return e.Init()
+	en, err := New()
+	if err != nil {
+		return err
+	}
+	(*e) = *en
+	return nil
 }
 
 // Load .env files. Files will be loaded in the same order that are received.

@@ -16,10 +16,8 @@ import (
 )
 
 var env = func() *Environment {
-	e := &Environment{}
-	if err := e.Load(); err != nil {
-		// don't panic, it's ok
-	}
+	e, _ := New()
+	e.Load()
 	return e
 }()
 
