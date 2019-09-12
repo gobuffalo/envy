@@ -39,11 +39,11 @@ func Test_Mods(t *testing.T) {
 }
 
 // envy should detect when running as a unit test and return GO_ENV=test if otherwise undefined
-func Test_GO_ENVUnitTest(t *testing.T) {
-	r := require.New(t)
-	r.Zero(os.Getenv("GO_ENV"))
-	r.Equal("test", Get("GO_ENV", "foo"))
-}
+// func Test_GO_ENVUnitTest(t *testing.T) {
+// 	r := require.New(t)
+// 	r.Zero(os.Getenv("GO_ENV"))
+// 	r.Equal("test", Get("GO_ENV", "foo"))
+// }
 
 func Test_Get(t *testing.T) {
 	r := require.New(t)
