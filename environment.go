@@ -187,6 +187,12 @@ func (e *Environment) Set(key string, value string) {
 		e.goMod = value
 	case "GO_BIN":
 		e.goBin = value
+	case "GO111MODULE":
+		if value == "off" {
+			e.goMod = ""
+		} else {
+			e.loadGoMod()
+		}
 	}
 	e.pairs.Store(key, value)
 }
