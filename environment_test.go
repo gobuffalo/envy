@@ -116,6 +116,7 @@ func Test_Environment_CurrentPackage(t *testing.T) {
 func Test_Environment_LoadEnvLoadsEnvFile(t *testing.T) {
 	r := require.New(t)
 	env.Temp(func(e *Environment) {
+		e.Load()
 		r.Equal("root", e.GetOr("DIR", ""))
 		r.Equal("none", e.GetOr("FLAVOUR", ""))
 		r.Equal("false", e.GetOr("INSIDE_FOLDER", ""))
