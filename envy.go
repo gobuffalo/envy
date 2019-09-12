@@ -15,6 +15,8 @@ import (
 	"strings"
 )
 
+const GO111MODULE = "GO111MODULE"
+
 var env = func() *Environment {
 	e, _ := New()
 	e.Load()
