@@ -1,6 +1,5 @@
 TAGS ?= ""
 GO_BIN ?= "go"
-GO_ENV ?= "test"
 
 install:
 	$(GO_BIN) install -tags ${TAGS} -v .
@@ -22,7 +21,7 @@ build:
 	make tidy
 
 test:
-	$(GO_BIN) test -cover -tags ${TAGS} ./...
+	$(GO_BIN) test -cover -tags ${TAGS} -race ./...
 	make tidy
 
 ci-deps:
@@ -58,5 +57,8 @@ release:
 	release -y -f version.go --skip-packr
 	make tidy
 
-
+cov:
+	$(GO_BIN) test -coverprofile cover.out -tags ${TAGS} ./...
+	go tool cover -html cover.out
+	make tidy
 
