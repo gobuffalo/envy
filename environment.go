@@ -30,7 +30,7 @@ type Environment struct {
 	goBin  string
 }
 
-func (e *Environment) clone() *Environment {
+func (e *Environment) Clone() *Environment {
 	en := &Environment{
 		Package: e.Package,
 		pairs:   &envMap{data: &sync.Map{}},
@@ -218,17 +218,6 @@ func (e *Environment) Map() map[string]string {
 		return true
 	})
 	return m
-}
-
-// Temp makes a copy of the values and allows operation on
-// those values temporarily during the run of the function.
-// At the end of the function run the copy is discarded and
-// the original values are replaced. This is useful for testing.
-// Warning: This function is NOT safe to use from a goroutine or
-// from code which may access any Get or Set function from a goroutine
-func (e *Environment) Temp(f func(ne *Environment)) {
-	en := e.clone()
-	f(en)
 }
 
 func (e *Environment) GoPath() string {

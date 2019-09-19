@@ -81,7 +81,7 @@ func Map() map[string]string {
 // from code which may access any Get or Set function from a goroutine
 func Temp(f func()) {
 	oenv := env
-	env = oenv.clone()
+	env = oenv.Clone()
 	defer func() { env = oenv }()
 	f()
 }
