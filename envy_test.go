@@ -204,10 +204,13 @@ func Test_StopLoadingWhenFileInListFails(t *testing.T) {
 func Test_GOPATH_Not_Set(t *testing.T) {
 	r := require.New(t)
 
+	dir, err := os.UserHomeDir()
+	r.NoError(err)
+
 	Temp(func() {
-		MustSet("GOPATH", "/go")
+		MustSet("GOPATH", dir)
 		loadEnv()
-		r.Equal("/go", Get("GOPATH", "notset"))
+		r.Equal(dir, Get("GOPATH", "notset"))
 	})
 
 	r.Equal("github.com/gobuffalo/envy", CurrentPackage())
