@@ -11,21 +11,23 @@ package envy makes working with ENV variables in Go trivial.
 package envy
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
 
-	"github.com/gobuffalo/here"
 	"github.com/joho/godotenv"
+	"github.com/rogpeppe/go-internal/modfile"
 )
 
 var gil = &sync.RWMutex{}
 var env = map[string]string{}
-var her = here.New()
 
 // GO111MODULE is ENV for turning mods on/off
 const GO111MODULE = "GO111MODULE"
@@ -70,12 +72,12 @@ func loadEnv() {
 // See https://github.com/golang/go/wiki/Modules#how-to-install-and-activate-module-support for details
 func Mods() bool {
 	go111 := Get(GO111MODULE, "")
-	if go111 == "off" {
-		return false
+
+	if !InGoPath() {
+		return go111 != "off"
 	}
 
-	info, _ := her.Current()
-	return !info.Module.IsZero()
+	return go111 == "on"
 }
 
 // Reload the ENV variables. Useful if
@@ -220,20 +222,47 @@ func GoPaths() []string {
 	return strings.Split(gp, ":")
 }
 
-func CurrentModule() (string, error) {
-	info, err := her.Current()
-	if err != nil {
-		return "", err
+func importPath(path string) string {
+	path = strings.TrimPrefix(path, "/private")
+	for _, gopath := range GoPaths() {
+		srcpath := filepath.Join(gopath, "src")
+		rel, err := filepath.Rel(srcpath, path)
+		if err == nil {
+			return filepath.ToSlash(rel)
+		}
 	}
-	if info.Module.IsZero() {
-		return info.ImportPath, nil
-	}
-	return info.Module.Path, nil
+
+	// fallback to trim
+	rel := strings.TrimPrefix(path, filepath.Join(GoPath(), "src"))
+	rel = strings.TrimPrefix(rel, string(filepath.Separator))
+	return filepath.ToSlash(rel)
 }
 
+// CurrentModule will attempt to return the module name from `go.mod` if
+// modules are enabled.
+// If modules are not enabled it will fallback to using CurrentPackage instead.
+func CurrentModule() (string, error) {
+	if !Mods() {
+		return CurrentPackage(), nil
+	}
+	moddata, err := ioutil.ReadFile("go.mod")
+	if err != nil {
+		return "", errors.New("go.mod cannot be read or does not exist while go module is enabled")
+	}
+	packagePath := modfile.ModulePath(moddata)
+	if packagePath == "" {
+		return "", errors.New("go.mod is malformed")
+	}
+	return packagePath, nil
+}
+
+// CurrentPackage attempts to figure out the current package name from the PWD
+// Use CurrentModule for a more accurate package name.
 func CurrentPackage() string {
-	info, _ := her.Current()
-	return info.ImportPath
+	if Mods() {
+	}
+	pwd, _ := os.Getwd()
+	return importPath(pwd)
 }
 
 func Environ() []string {
