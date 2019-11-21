@@ -232,7 +232,10 @@ func CurrentModule() (string, error) {
 }
 
 func CurrentPackage() string {
-	info, _ := her.Current()
+	info, err := her.Current()
+	if err != nil {
+		panic(err)
+	}
 	return info.ImportPath
 }
 
