@@ -106,9 +106,11 @@ func Test_GoPaths(t *testing.T) {
 	})
 }
 
-func Test_CurrentPackage(t *testing.T) {
+func Test_CurrentModule(t *testing.T) {
 	r := require.New(t)
-	r.Equal("github.com/gobuffalo/envy", CurrentPackage())
+	mod, err := CurrentModule()
+	r.NoError(err)
+	r.Equal("github.com/gobuffalo/envy", mod)
 }
 
 // Env files loading
@@ -210,5 +212,7 @@ func Test_GOPATH_Not_Set(t *testing.T) {
 		r.Equal("/go", Get("GOPATH", "notset"))
 	})
 
-	r.Equal("github.com/gobuffalo/envy", CurrentPackage())
+	mod, err := CurrentModule()
+	r.NoError(err)
+	r.Equal("github.com/gobuffalo/envy", mod)
 }
