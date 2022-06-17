@@ -67,29 +67,45 @@ func Test_Temp(t *testing.T) {
 ```
 ## .env files support
 
-Envy now supports loading `.env` files by using the [godotenv library](https://github.com/joho/godotenv/).
-That means one can use and define multiple `.env` files which will be loaded on-demand. By default, no env files will be loaded. To load one or more, you need to call the `envy.Load` function in one of the following ways:
+NOTE: the behavior of `.env` support was changed in `v2`.
+Previously, `envy.Load()` overwrote all pre-existing environment variables
+with the values in the `.env` file but now pre-existing variables have higher
+priority and will remain as is. (It will help you to configure your runtime
+environment in the modern platforms including cloud computing environments)
+
+Envy now supports loading `.env` files by using the
+[godotenv library](https://github.com/joho/godotenv/).
+That means one can use and define multiple `.env` files which will be loaded
+on-demand.
+By default, Envy loads `.env` file in the working directory if the file exists.
+To load additional one or more, you need to call the `envy.Load` function in
+one of the following ways:
 
 ```go
 envy.Load() // 1
 
 envy.Load("MY_ENV_FILE") // 2
 
-envy.Load(".env", ".env.prod") // 3
+envy.Load(".env.prod", ".env") // 3
 
 envy.Load(".env", "NON_EXISTING_FILE") // 4
 
-// 5
-envy.Load(".env")
-envy.Load("NON_EXISTING_FILE")
+envy.Load(".env.prod", "NON_EXISTING_FILE", ".env") // 5
 
 // 6
-envy.Load(".env", "NON_EXISTING_FILE", ".env.prod")
+envy.Load(".env.prod")
+envy.Load("NON_EXISTING_FILE")
+envy.Load(".env")
+
 ```
 
-1. Will load the default `.env` file
+1. Will load the default `.env` file from the current working directory.
 2. Will load the file `MY_ENV_FILE`, **but not** `.env`
-3. Will load the file `.env`, and after that will load the `.env.prod` file. If any variable is redefined in `. env.prod` it will be overwritten (will contain the `env.prod` value)
-4. Will load the `.env` file and return an error as the second file does not exist. The values in `.env` will be loaded and available.
-5. Same as 4
-6. Will load the `.env` file and return an error as the second file does not exist. The values in `.env` will be loaded and available, **but the ones in** `.env.prod` **won't**.
+3. Will load the file `.env.prod` first, then will load the `.env` file.
+   If any variable is redefined in `.env`, they will be ignored.
+4. Will load the `.env` file and return an error as the second file does not
+   exist. The values in `.env` will be loaded and available.
+5. Will load the `.env.prod` file and return an error as the second file does
+   not exist. The values in `.env.prod` will be loaded and available,
+   **but the ones in** `.env` **won't**.
+5. The result of this will be the same as 3 as you expected.
