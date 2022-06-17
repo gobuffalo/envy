@@ -1,3 +1,3 @@
 package envy
 
-const Version = "v1.10.1"
+const Version = "v2.0.0"
