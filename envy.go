@@ -17,27 +17,23 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"sync"
 
 	"github.com/joho/godotenv"
-	"github.com/rogpeppe/go-internal/modfile"
+	"golang.org/x/mod/modfile"
 )
 
 var gil = &sync.RWMutex{}
 var env = map[string]string{}
 
-// GO111MODULE is ENV for turning mods on/off
-const GO111MODULE = "GO111MODULE"
-
 func init() {
 	Load()
-	loadEnv()
+	loadSystemEnv()
 }
 
 // Load the ENV variables to the env map
-func loadEnv() {
+func loadSystemEnv() {
 	gil.Lock()
 	defer gil.Unlock()
 
@@ -71,7 +67,7 @@ func loadEnv() {
 // an external ENV manager has been used
 func Reload() {
 	env = map[string]string{}
-	loadEnv()
+	loadSystemEnv()
 }
 
 // Load .env files. Files will be loaded in the same order that are received.
@@ -82,7 +78,7 @@ func Load(files ...string) error {
 
 	// If no files received, load the default one
 	if len(files) == 0 {
-		err := godotenv.Overload()
+		err := godotenv.Load()
 		if err == nil {
 			Reload()
 		}
@@ -100,7 +96,7 @@ func Load(files ...string) error {
 		}
 
 		// It exists and we have permission. Load it
-		if err := godotenv.Overload(file); err != nil {
+		if err := godotenv.Load(file); err != nil {
 			return err
 		}
 
@@ -170,7 +166,8 @@ func Map() map[string]string {
 // those values temporarily during the run of the function.
 // At the end of the function run the copy is discarded and
 // the original values are replaced. This is useful for testing.
-// Warning: This function is NOT safe to use from a goroutine or
+//
+// WARNING: This function is NOT safe to use from a goroutine or
 // from code which may access any Get or Set function from a goroutine
 func Temp(f func()) {
 	oenv := env
@@ -190,25 +187,6 @@ func GoBin() string {
 	return Get("GO_BIN", "go")
 }
 
-func InGoPath() bool {
-	pwd, _ := os.Getwd()
-	for _, p := range GoPaths() {
-		if strings.HasPrefix(pwd, p) {
-			return true
-		}
-	}
-	return false
-}
-
-// GoPaths returns all possible GOPATHS that are set.
-func GoPaths() []string {
-	gp := Get("GOPATH", "")
-	if runtime.GOOS == "windows" {
-		return strings.Split(gp, ";") // Windows uses a different separator
-	}
-	return strings.Split(gp, ":")
-}
-
 // CurrentModule will attempt to return the module name from `go.mod`.
 // GOPATH isn't supported, no fallback to `CurrentPackage()` anymore.
 func CurrentModule() (string, error) {
@@ -223,6 +201,8 @@ func CurrentModule() (string, error) {
 	return packagePath, nil
 }
 
+// Environ returns a copy of strings representing the environment, in the form
+// "key=value".
 func Environ() []string {
 	gil.RLock()
 	defer gil.RUnlock()
